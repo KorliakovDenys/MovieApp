@@ -1,0 +1,62 @@
+@page "/movie"
+@page "/movie/{id:int}"
+@inject IMovieService MovieService
+@inject NavigationManager NavigationManager
+
+<a href="/movies">&#60; Movies</a>
+@if (Id is null) {
+    <PageTitle>Create a new movie</PageTitle>
+    <h2>Create a new movie</h2>
+}
+else {
+    <PageTitle>@_selectedMovie?.Name</PageTitle>
+    <h2>@_selectedMovie?.Name</h2>
+}
+
+<EditForm class="d-flex flex-column" Model="_selectedMovie">
+    <p>@_selectedMovie!.Description</p>
+
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>Room</th>
+            <th>Available tickets</th>
+            <th>Start</th>
+        </tr>
+        </thead>
+        <tbody>
+        @if (_selectedMovie != null) {
+            foreach (var session in _selectedMovie.Sessions) {
+                <tr @onclick="() => ShowSession(session.Id)">
+                    <th>@session.Room</th>
+                    <th>@session.AvailableTickets</th>
+                    <th>@session.DateTime</th>
+                </tr>
+            }
+        }
+        </tbody>
+    </table>
+</EditForm>
+
+@code{
+
+    [Parameter]
+    public int? Id { get; set; }
+    
+    private Models.Movie? _selectedMovie = new();
+
+    protected override async Task OnInitializedAsync() {
+        if (Id is not null) {
+            var result = await MovieService.GetMovieByIdAsync((int)Id).ConfigureAwait(false);
+            if (result is not null) {
+                _selectedMovie = result;
+            }
+            else
+                NavigationManager.NavigateTo("/movie");
+        }
+    }
+    
+    private void ShowSession(int id) {
+        NavigationManager.NavigateTo($"/session/{Id}/{id}");
+    }
+}

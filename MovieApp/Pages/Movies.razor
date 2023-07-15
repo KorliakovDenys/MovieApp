@@ -1,0 +1,55 @@
+@page "/movies"
+@inject IMovieService MovieService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Movies</PageTitle>
+
+<div>
+    <h3>Movies</h3>
+    @* @if (AppState.MovieFilter.Length != 0) { *@
+    @*     <div class="d-flex align-items-center my-2"> *@
+    @*         <span>Results for "@AppState.MovieFilter"</span> *@
+    @*         <button class="btn oi oi-circle-x" @onclick="() => AppState.MovieFilter = string.Empty"></button> *@
+    @*     </div> *@
+    @* } *@
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Director</th>
+            <th>Style</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var movie in MovieService.Movies!) {
+            <tr @onclick="() => ShowMovie(movie.Id)">
+                <th>@movie.Name</th>
+                <th>@movie.Director</th>
+                <th>@movie.Style</th>
+                @* <td> *@
+                @*     <button class="btn btn-primary oi oi-pencil" *@
+                @*             @onclick="() => ShowMovie(movie.Id)"> *@
+                @*     </button> *@
+                @* </td> *@
+            </tr>
+        }
+        </tbody>
+    </table>
+
+</div>
+
+@code{
+
+    protected override async Task OnInitializedAsync() {
+        await MovieService.GetMoviesAsync();
+    }
+
+    private void ShowMovie(int id) {
+        NavigationManager.NavigateTo($"/movie/{id}");
+    }
+
+    private void CreateMovie() {
+        NavigationManager.NavigateTo($"/movie");
+    }
+
+}
