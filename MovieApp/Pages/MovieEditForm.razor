@@ -1,0 +1,72 @@
+@page "/movie/edit"
+@page "/movie/edit/{id:int}"
+@inject IMovieService MovieService
+@inject NavigationManager NavigationManager
+
+@if (Id is null) {
+    <PageTitle>Movie Creation</PageTitle>
+}
+else {
+    <PageTitle>Movie Edit</PageTitle>
+}
+
+<EditForm Model="_movie" class="d-grid gap-2">
+    <div class="form-group p-2">
+        <label for="title-input">Title:</label>
+        <input class="form-control" type="text" id="title-input" @bind="_movie!.Name">
+    </div>
+    <div class="form-group p-2">
+        <label for="director-input">Director:</label>
+        <input class="form-control" type="text" id="director-input" @bind="_movie!.Director"/>
+    </div>
+    <div class="form-group p-2">
+        <label for="style-input">Style:</label>
+        <input class="form-control" type="text" id="style-input" @bind="_movie!.Style"/>
+    </div>
+    <div class="form-group p-2">
+        <label for="desc-input">Description:</label>
+        <textarea class="form-control" id="desc-input" @bind="_movie!.Description"></textarea>
+    </div>
+    <div class="form-group p-2 d-grid gap-1">
+        <button class="form-control btn btn-primary" @onclick="SaveMovie">
+            Save
+        </button>
+        <button class="form-control btn btn-secondary" @onclick="Cancel">
+            Cancel
+        </button>
+    </div>
+</EditForm>
+
+@code {
+
+    [Parameter]
+    public int? Id { get; set; }
+
+    private Models.Movie? _movie = new();
+
+    protected override async Task OnInitializedAsync() {
+        if (Id is null) return;
+
+        _movie = await MovieService.GetMovieByIdAsync((int)Id);
+    }
+
+    private async Task SaveMovie() {
+        if (Id is null) {
+            await MovieService.CreateMovieAsync(_movie!);
+            NavigationManager.NavigateTo($"movies");
+            return;
+        }
+
+        await MovieService.UpdateMovieAsync(_movie!.Id, _movie!);
+        NavigationManager.NavigateTo($"movie/{_movie.Id}");
+    }
+
+    private void Cancel() {
+        if (Id is null) {
+            NavigationManager.NavigateTo($"movies");
+            return;
+        }
+        NavigationManager.NavigateTo($"movie/{_movie!.Id}");
+    }
+
+}

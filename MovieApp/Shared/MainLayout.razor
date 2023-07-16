@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@inject IMovieService MovieService
 <PageTitle>MovieApp</PageTitle>
 
 <div class="page">
@@ -27,6 +28,6 @@
     private string _searchInput = string.Empty;
     
     private void OnSearchButtonClick() {
-        // AppState.MovieFilter = _searchInput;
+        // MovieService.Filter = _searchInput;
     }
 }

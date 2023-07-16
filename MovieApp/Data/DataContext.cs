@@ -14,12 +14,8 @@ namespace MovieApp.Data {
                 .HasOne(s => s.Movie)
                 .WithMany(c => c.Sessions)
                 .HasForeignKey(s => s.MovieId)
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<Movie>()
-                .HasMany(m => m.Sessions)
-                .WithOne(s => s.Movie)
-                .HasForeignKey(s => s.MovieId)
-                .IsRequired();
+                .OnDelete(DeleteBehavior.Cascade);
+
 
             base.OnModelCreating(modelBuilder);
         }

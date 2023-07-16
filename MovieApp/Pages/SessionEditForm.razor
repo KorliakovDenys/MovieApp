@@ -1,0 +1,71 @@
+@page "/session/create/{movieid:int}"
+@page "/session/edit/{movieid:int}/{id:int}"
+@inject IMovieService MovieService
+@inject NavigationManager NavigationManager
+
+@if (Id is null) {
+    <PageTitle>Session Creation</PageTitle>
+}
+else {
+    <PageTitle>Session Edit</PageTitle>
+}
+
+<EditForm Model="_session" class="d-grid gap-2">
+    <div class="form-group p-2">
+        <label for="title-input">Room:</label>
+        <input class="form-control" type="text" id="title-input" @bind="_session!.Room">
+    </div>
+    <div class="form-group p-2">
+        <label for="director-input">Available Tickets:</label>
+        <input class="form-control" type="number" id="director-input" @bind="_session!.AvailableTickets"/>
+    </div>
+    <div class="form-group p-2">
+        <label for="style-input">Start Time:</label>
+        <input class="form-control" type="date" id="style-input" @bind="_session!.DateTime"/>
+    </div>
+    <div class="form-group p-2 d-grid gap-1">
+        <button class="form-control btn btn-primary" @onclick="SaveSession">
+            Save
+        </button>
+        <button class="form-control btn btn-secondary" @onclick="Cancel">
+            Cancel
+        </button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int? MovieId { get; set; }
+
+    [Parameter]
+    public int? Id { get; set; }
+
+    private Models.Session? _session = new();
+
+    protected override async Task OnInitializedAsync() {
+        if (MovieId is not null) _session!.MovieId = (int)MovieId;
+        if (Id is null) return;
+
+        _session = await MovieService.GetSessionByIdAsync((int)Id);
+    }
+
+    private async Task SaveSession() {
+        if (Id is null) {
+            await MovieService.CreateSessionAsync(_session!);
+            NavigationManager.NavigateTo($"movie/{MovieId}");
+            return;
+        }
+
+        await MovieService.UpdateSessionAsync(_session!.Id, _session!);
+        NavigationManager.NavigateTo($"movie/{MovieId}");
+    }
+
+    private void Cancel() {
+        if (Id is null) {
+            NavigationManager.NavigateTo($"movie/{MovieId}");
+            return;
+        }
+        NavigationManager.NavigateTo($"movie/{MovieId}");
+    }
+
+}

@@ -1,16 +1,16 @@
-@page "/session/{movieId:int}/{id:int}"
+@page "/session/{movieid:int}/{id:int}"
 @inject IMovieService MovieService
 @inject NavigationManager NavigationManager
 
 <PageTitle>Session</PageTitle>
 
 <div class="d-flex flex-column">
-    <a href="/movie/@MovieId">&#60; Sessions</a>
+    <a href="/movie/@_selectedSession!.MovieId">&#60; Sessions</a>
     @if (_selectedSession is not null) {
         <h3>@_selectedSession.Room</h3>
         <span>Available tickets: @_selectedSession.AvailableTickets</span>
         if (_selectedSession.AvailableTickets > 0) {
-            <button class="btn btn-primary" @onclick="() => _selectedSession.AvailableTickets--">Buy ticket</button>
+            <button class="btn btn-primary" @onclick="BuyTicket">Buy ticket</button>
         }
         else {
             <span>No tickets available.</span>
@@ -19,22 +19,29 @@
 </div>
 
 @code{
-    [Parameter]
-    public int? MovieId { get; set; }
-    
+
     [Parameter]
     public int? Id { get; set; }
+    [Parameter]
+    public int? MovieId { get; set; }
 
     private Models.Session? _selectedSession = new();
 
     protected override async Task OnInitializedAsync() {
         if (Id is not null) {
             var result = await MovieService.GetSessionByIdAsync((int)Id).ConfigureAwait(false);
-            if (result is not null) {
+            if (result is not null && result.MovieId == MovieId) {
                 _selectedSession = result;
             }
             else
-                NavigationManager.NavigateTo("/movie");
+                NavigationManager.NavigateTo($"/movie/{MovieId}");
         }
     }
+
+    private async Task BuyTicket() {
+        if (_selectedSession!.AvailableTickets <= 0) return;
+        _selectedSession.AvailableTickets--;
+        await MovieService.UpdateSessionAsync(_selectedSession.Id, _selectedSession);
+    }
+
 }

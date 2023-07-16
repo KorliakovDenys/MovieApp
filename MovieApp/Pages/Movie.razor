@@ -3,10 +3,9 @@
 @inject IMovieService MovieService
 @inject NavigationManager NavigationManager
 
-<a href="/movies">&#60; Movies</a>
+<a href="/movies" class="mb-2">&#60; Movies</a>
 @if (Id is null) {
-    <PageTitle>Create a new movie</PageTitle>
-    <h2>Create a new movie</h2>
+    NavigationManager.NavigateTo("movies");
 }
 else {
     <PageTitle>@_selectedMovie?.Name</PageTitle>
@@ -14,8 +13,20 @@ else {
 }
 
 <EditForm class="d-flex flex-column" Model="_selectedMovie">
+    <h5>Director</h5>
+    <p>@_selectedMovie!.Director</p>
+    <h5>Style</h5>
+    <p>@_selectedMovie.Style</p>
+    <h5>Description</h5>
     <p>@_selectedMovie!.Description</p>
 
+    <div class="d-flex justify-content-between">
+            <h3>Sessions</h3>
+            <button class="btn btn-primary" @onclick="CreateSession">
+                <i class="oi oi-plus p-1"></i>
+                <span>Add Session</span>
+            </button>
+        </div>
     <table class="table table-hover">
         <thead>
         <tr>
@@ -31,6 +42,14 @@ else {
                     <th>@session.Room</th>
                     <th>@session.AvailableTickets</th>
                     <th>@session.DateTime</th>
+                    <td>
+                        <button class="btn btn-primary oi oi-pencil" @onclick:stopPropagation="true"
+                                @onclick="() => EditSession(session.Id)">
+                        </button>
+                        <button class="btn btn-secondary oi oi-trash" @onclick:stopPropagation="true"
+                                @onclick="() => DeleteSession(session.Id)">
+                        </button>
+                    </td>
                 </tr>
             }
         }
@@ -42,7 +61,7 @@ else {
 
     [Parameter]
     public int? Id { get; set; }
-    
+
     private Models.Movie? _selectedMovie = new();
 
     protected override async Task OnInitializedAsync() {
@@ -55,8 +74,21 @@ else {
                 NavigationManager.NavigateTo("/movie");
         }
     }
-    
+
     private void ShowSession(int id) {
-        NavigationManager.NavigateTo($"/session/{Id}/{id}");
+        NavigationManager.NavigateTo($"/session/{_selectedMovie!.Id}/{id}");
+    }
+
+    private void CreateSession() {
+        NavigationManager.NavigateTo($"/session/create/{_selectedMovie!.Id}");
+    }
+
+    private void EditSession(int id) {
+        NavigationManager.NavigateTo($"/session/edit/{_selectedMovie!.Id}/{id}");
+    }
+
+    private async Task DeleteSession(int id) {
+        await MovieService.DeleteSessionAsync(id);
+        _selectedMovie!.Sessions = await MovieService.GetSessionsAsync(_selectedMovie.Id);
     }
 }

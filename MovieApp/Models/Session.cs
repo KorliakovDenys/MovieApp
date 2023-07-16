@@ -8,7 +8,7 @@ namespace MovieApp.Models {
         
         public string? Room { get; set; }
         
-        public DateTime DateTime { get; set; }
+        public DateTime DateTime { get; set; } = DateTime.Today;
         
         public int AvailableTickets { get; set; }
 

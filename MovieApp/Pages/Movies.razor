@@ -5,13 +5,19 @@
 <PageTitle>Movies</PageTitle>
 
 <div>
-    <h3>Movies</h3>
-    @* @if (AppState.MovieFilter.Length != 0) { *@
-    @*     <div class="d-flex align-items-center my-2"> *@
-    @*         <span>Results for "@AppState.MovieFilter"</span> *@
-    @*         <button class="btn oi oi-circle-x" @onclick="() => AppState.MovieFilter = string.Empty"></button> *@
-    @*     </div> *@
-    @* } *@
+    <div class="d-flex justify-content-between">
+        <h3>Movies</h3>
+        <button class="btn btn-primary" @onclick="CreateMovie">
+            <i class="oi oi-plus p-1"></i>
+            <span>Add Movie</span>
+        </button>
+    </div>
+    @if (MovieService.Filter!.Length > 0) {
+        <div class="d-flex align-items-center my-2">
+            <span>Results for "@MovieService.Filter"</span>
+            <button class="btn oi oi-circle-x" @onclick="() => MovieService.Filter = string.Empty"></button>
+        </div>
+    }
     <table class="table table-hover">
         <thead>
         <tr>
@@ -26,11 +32,14 @@
                 <th>@movie.Name</th>
                 <th>@movie.Director</th>
                 <th>@movie.Style</th>
-                @* <td> *@
-                @*     <button class="btn btn-primary oi oi-pencil" *@
-                @*             @onclick="() => ShowMovie(movie.Id)"> *@
-                @*     </button> *@
-                @* </td> *@
+                <td>
+                    <button class="btn btn-primary oi oi-pencil" @onclick:stopPropagation="true"
+                            @onclick="() => EditMovie(movie.Id)">
+                    </button>
+                    <button class="btn btn-secondary oi oi-trash" @onclick:stopPropagation="true"
+                            @onclick="() => DeleteMovie(movie.Id)">
+                    </button>
+                </td>
             </tr>
         }
         </tbody>
@@ -41,7 +50,9 @@
 @code{
 
     protected override async Task OnInitializedAsync() {
-        await MovieService.GetMoviesAsync();
+        // if (MovieService.Filter!.Length == 0) 
+            await MovieService.GetMoviesAsync();
+        // else await MovieService.GetMoviesAsync(MovieService.Filter);
     }
 
     private void ShowMovie(int id) {
@@ -49,7 +60,16 @@
     }
 
     private void CreateMovie() {
-        NavigationManager.NavigateTo($"/movie");
+        NavigationManager.NavigateTo($"/movie/edit");
+    }
+
+    private void EditMovie(int id) {
+        NavigationManager.NavigateTo($"/movie/edit/{id}");
+    }
+
+    private async Task DeleteMovie(int id) {
+        await MovieService.DeleteMovieAsync(id);
+        await MovieService.GetMoviesAsync();
     }
 
 }
